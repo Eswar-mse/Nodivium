@@ -13,7 +13,19 @@
 
 </div>
 
-> **Release in progress:** This source checkout includes the Nodivium web workspace and CLI. The renamed package has not been published to PyPI yet.
+## Install the release
+
+Use Python 3.10 or newer. The wheel includes the web assets, so Node.js is not needed for a normal install.
+
+```bash
+python -m venv .venv
+# Linux: source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install "nodivium[web]"
+nodivium web
+```
+
+`nodivium web` opens <http://127.0.0.1:8765> in your browser when the server is ready. If you are using SSH or a machine without a browser, run `nodivium web --no-browser` and open the printed URL yourself. Install `nodivium` without `[web]` for the CLI alone. Set `NODIVIUM_NCBI_EMAIL` to your real contact address before requesting NCBI records, as shown below.
 
 ## Try the web workspace from source
 
@@ -31,7 +43,7 @@ cd ..
 nodivium web
 ```
 
-Open <http://127.0.0.1:8765>. Search UniProt, NCBI, or RCSB PDB; inspect records, sequences, structures, and source-backed UniProt cross-references; add records to a ZIP collection with a manifest that includes per-file SHA-256 checksums and retrieval failures. Local FASTA, PDB, and mmCIF files are read in the browser and are not uploaded to Nodivium. Multi-record FASTA files have a sequence picker and a nucleotide/protein interpretation control. The web service listens on the local computer only.
+The command opens <http://127.0.0.1:8765> automatically. Search UniProt, NCBI, or RCSB PDB; inspect records, sequences, structures, and source-backed UniProt cross-references; add records to a ZIP collection with a manifest that includes per-file SHA-256 checksums and retrieval failures. Local FASTA, PDB, and mmCIF files are read in the browser and are not uploaded to Nodivium. Multi-record FASTA files have a sequence picker and a nucleotide/protein interpretation control. The web service listens on the local computer only.
 
 For NCBI access, set a real contact address before starting Nodivium. NCBI's usage policy requires an identifiable tool contact. An optional NCBI API key can be provided for higher rate limits:
 
@@ -60,9 +72,9 @@ Existing NCBI environment settings remain supported as fallbacks. Nodivium migra
 | Best for | Exploring unfamiliar records, viewing sequences and 3D structures, comparing source details, and assembling a small mixed-source collection. | Repeated downloads, shell scripts, remote/SSH sessions, and saving many records to a chosen folder. |
 | Strengths | Search cards, source-aware record views, dark/light theme, resizable inspector, local file inspection, interactive structure colors, representations and visibility, and ZIP export with a provenance manifest. | Fast repeat access through the local cache, clear text output, NCBI FASTA batch retrieval, and automation-friendly commands. |
 | Tradeoffs | Needs a browser, local web dependencies, and WebGL for 3D viewing; collections currently have a 25-record/20 MB limit and discovery shows up to 50 results. | No interactive 3D viewer or browser charts; users choose IDs, formats, and output paths through command options. |
-| Install from this checkout | `uv pip install --python .venv/bin/python -e '.[web]'` after creating a virtual environment; build `web/` assets once. | `uv pip install --python .venv/bin/python -e .` after creating a virtual environment. |
+| Install | `python -m pip install "nodivium[web]"` | `python -m pip install nodivium` |
 
-Both modes use the same NCBI, UniProt, and RCSB PDB providers and share the local cache. Start the web workspace with `nodivium web`; type `nodivium` for the CLI command guide. Install from this checkout until the Nodivium package is published.
+Both modes use the same NCBI, UniProt, and RCSB PDB providers and share the local cache. Start the web workspace with `nodivium web`; type `nodivium` for the CLI command guide.
 
 ---
 

@@ -24,7 +24,7 @@ python tests.py
 python -m pytest -q tests_upgrade.py
 ```
 
-Expected: Python reports 3.12.x; `nodivium version` reports `2.0.0.dev0`; npm build succeeds; parser, legacy, and focused Python checks pass. Stop and report the exact command/output if any step fails.
+Expected: Python reports 3.12.x; `nodivium version` reports `2.0.0`; npm build succeeds; parser, legacy, and focused Python checks pass. Stop and report the exact command/output if any step fails.
 
 ## 2. Start the local web app
 
@@ -41,9 +41,9 @@ Leave that terminal running. In a second terminal, run:
 curl -fsS http://127.0.0.1:8765/api/health
 ```
 
-Expected: JSON with `"status":"ok"` and version `2.0.0.dev0`. Open **http://127.0.0.1:8765/** in Chrome or Firefox. Use this address, not `web/index.html` opened as a file. The page should show the Nodivium logo, three-column workspace on desktop, and styled light/dark themes.
+Expected: `nodivium web` opens the browser after the server is ready, and the health check returns JSON with `"status":"ok"` and version `2.0.0`. If browser opening is unavailable, open **http://127.0.0.1:8765/** yourself. Use this address, not `web/index.html` opened as a file. The page should show the Nodivium logo, three-column workspace on desktop, and styled light/dark themes.
 
-If port 8765 is busy, stop the app with Ctrl+C and run `nodivium web --port 8766`; use port 8766 in the browser and health check.
+If port 8765 is busy, stop the app with Ctrl+C and run `nodivium web --port 8766`; use port 8766 in the browser and health check. For SSH or headless use, add `--no-browser`.
 
 ## 3. Browser test matrix
 
@@ -62,7 +62,7 @@ Record each row as pass/fail and note the browser name and version.
 | Structure measurement | Open `1HHO`, press **Select residues**, click one residue in the model, then **Label selection**. Clear selection, select two different residues, then press **Measure distance**. | The selected count changes to 1 or 2. A label or distance appears on the structure; **Clear selection** resets the count. The same actions work after expanding the inspector. |
 | Viewer themes and sizing | Switch light/dark themes while viewing a structure, change canvas/protein colors, resize the inspector, and press **Fit structure**. | Controls remain readable; the whole model fits in the viewport. Colors persist when the expanded view closes. |
 | Structure representations | Open `1HHO`, expand **Representations**, and change the protein to **Ball & Stick**, then **Cartoon**. Change a ligand or other listed component if present. | Only components in the record are listed; each menu offers applicable Mol* styles. The selected component changes style and keeps its color. The model remains rotatable and measurable. |
-| Structure visibility | Open a structure containing water and ions. Under **Representations**, turn their **Show** switches off and on. Select two residues, press **Hide selected**, then **Restore full view**. Select again, press **Show only selected**, then restore. | Water and ions toggle independently. Hidden residues disappear, and isolate shows only the picked residues. Restore brings back the full structure while respecting component switches and color choices. |
+| Structure visibility | Open a structure containing water and ions. Under **Show components**, turn their switches off and on. Select two residues, press **Hide selected**, then **Restore full view**. Select again, press **Show only selected**, then restore. | Water and ions toggle independently. Absent components have disabled switches. Hidden residues disappear, and isolate shows only the picked residues. Restore brings back the full structure while respecting component switches and color choices. |
 | Empty search | Choose RCSB PDB and search an unlikely string such as `zzzxxyy-no-hit-test-2026`. | **No records found**, not a JSON parsing error. |
 | Single download | Download `P68871` as FASTA, `NM_007294` as GenBank, and `1HHO` as mmCIF. | Files save with sensible names and nonempty original content. |
 | Local multi-FASTA | Use **Choose a file** and select `docs/test-data/multi.fasta`. | The picker lists two records. Changing records changes title, sequence, and length. The nucleotide record has a GC chart; the protein record does not. Try the sequence-type selector. |

@@ -21,7 +21,7 @@
 
 The repository is `Eswar-mse/Nodivium`. Add a pending PyPI Trusted Publisher for project `nodivium` with owner `Eswar-mse`, repository `Nodivium`, workflow `publish.yml`, and environment `pypi`. A pending publisher does not reserve the PyPI name; confirm availability before publishing.
 
-After the release gates pass, change the package version from `2.0.0.dev0` to the intended stable version, commit it, and create a GitHub release with a matching tag such as `v2.0.0`. Publishing the GitHub release triggers `.github/workflows/publish.yml`, which rebuilds assets, runs tests, checks the wheel, and publishes the wheel and source archive to PyPI. Confirm the workflow and `pip install "nodivium[web]"` in a fresh environment before announcing the release.
+The package version is `2.0.0`. After the release gates pass, create a GitHub release with tag `v2.0.0` from the tested main commit. Publishing the GitHub release triggers `.github/workflows/publish.yml`, which rebuilds assets, runs tests, checks the wheel, and publishes the wheel and source archive to PyPI. Confirm the workflow and `pip install "nodivium[web]"` in a fresh environment before announcing the release.
 
 ## Release scope
 

@@ -410,8 +410,11 @@ def version():
 
 
 @app.command("web")
-def web(port: int = typer.Option(8765, "--port", help="Local web port")):
-    """Open the Nodivium web workspace on this computer."""
+def web(
+    port: int = typer.Option(8765, "--port", help="Local web port"),
+    browser: bool = typer.Option(True, "--browser/--no-browser", help="Open the browser when the server is ready"),
+):
+    """Start the local web workspace and open it in your browser."""
     if not 1024 <= port <= 65535:
         disp.print_error("Choose a port from 1024 to 65535.")
         raise typer.Exit(2)
@@ -420,8 +423,19 @@ def web(port: int = typer.Option(8765, "--port", help="Local web port")):
     except ImportError as exc:
         disp.print_error("Web dependencies are missing. Install with: pip install 'nodivium[web]'")
         raise typer.Exit(2) from exc
-    disp.print_info(f"Open http://127.0.0.1:{port} in your browser")
-    uvicorn.run("nodivium.web:app", host="127.0.0.1", port=port)
+    url = f"http://127.0.0.1:{port}"
+    disp.print_info(f"Nodivium web workspace: {url}")
+
+    class BrowserOpeningServer(uvicorn.Server):
+        async def startup(self, sockets=None):
+            await super().startup(sockets=sockets)
+            if browser and self.started:
+                import threading
+                import webbrowser
+
+                threading.Thread(target=webbrowser.open, args=(url,), kwargs={"new": 2}, daemon=True).start()
+
+    BrowserOpeningServer(uvicorn.Config("nodivium.web:app", host="127.0.0.1", port=port)).run()
 
 
 # ─── Entry point ──────────────────────────────────────────────────────────────
