@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.1] - 2026-11-16
+### Fixed
+- A plain `pip install nodivium`, `pipx install nodivium`, or `uv tool install nodivium` now includes FastAPI and Uvicorn, so `nodivium web` works without the `[web]` extra. The extra remains accepted for older install instructions.
+
 ## [2.0.0] - 2026-11-16
 ### Added and changed
 - Rebranded the source package, CLI command, web workspace, downloadable files, and documentation as Nodivium; added the user-inspired transparent mark and compatibility for previous NCBI environment settings and browser preferences.

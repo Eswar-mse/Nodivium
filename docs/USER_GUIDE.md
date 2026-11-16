@@ -1,4 +1,4 @@
-# Nodivium 2.0 user guide
+# Nodivium user guide
 
 Nodivium helps you find, inspect, visualize, and export records from **NCBI**, **UniProtKB**, and **RCSB PDB**. It has a local browser workspace and a command-line interface (CLI). Both use your computer and contact the source databases when you request remote records.
 
@@ -27,19 +27,19 @@ Nodivium needs Python 3.10 or newer. A normal PyPI installation includes the bui
 If [uv](https://docs.astral.sh/uv/) is installed, run this from any directory on Linux or Windows:
 
 ```bash
-uv tool install 'nodivium[web]'
+uv tool install nodivium
 nodivium version
 nodivium web
 ```
 
-The `[web]` extra installs FastAPI and Uvicorn for the local browser workspace. Use `uv tool install nodivium` if you only need the CLI. If `nodivium` is not found after installation, run `uv tool update-shell`, open a new terminal, and try `nodivium version` again. To update a uv-managed installation later, use `uv tool upgrade nodivium`.
+The standard installation includes the browser workspace and CLI. Older commands using `nodivium[web]` still work. If `nodivium` is not found after installation, run `uv tool update-shell`, open a new terminal, and try `nodivium version` again. To update a uv-managed installation later, use `uv tool upgrade nodivium`.
 
 ### App install with pipx
 
 If you use [pipx](https://pipx.pypa.io/), the equivalent command is:
 
 ```bash
-pipx install 'nodivium[web]'
+pipx install nodivium
 nodivium web
 ```
 
@@ -54,7 +54,7 @@ Use this route if you need `import nodivium` inside a Python project, or if uv a
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install 'nodivium[web]'
+python -m pip install nodivium
 nodivium web
 ```
 
@@ -63,11 +63,11 @@ nodivium web
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install 'nodivium[web]'
+python -m pip install nodivium
 nodivium web
 ```
 
-If PowerShell does not allow activation, you can run `.\.venv\Scripts\python.exe -m pip install 'nodivium[web]'` and `.\.venv\Scripts\nodivium.exe web` directly. For the CLI alone, install `nodivium` without `[web]`.
+If PowerShell does not allow activation, you can run `.\.venv\Scripts\python.exe -m pip install nodivium` and `.\.venv\Scripts\nodivium.exe web` directly.
 
 On Ubuntu and other distributions with an **externally managed** system Python, plain `pip install nodivium` outside a virtual environment is blocked by design. Use uv, pipx, or a virtual environment. Do not use `--break-system-packages` for this app.
 
@@ -226,9 +226,9 @@ The web service listens on `127.0.0.1`, not on a public network interface. Reque
 
 | Symptom | What to check or do |
 | --- | --- |
-| `externally-managed-environment` from `pip install` | You are using system Python. Install the app with `uv tool install 'nodivium[web]'` or `pipx install 'nodivium[web]'`, or activate a virtual environment before using pip. |
+| `externally-managed-environment` from `pip install` | You are using system Python. Install the app with `uv tool install nodivium` or `pipx install nodivium`, or activate a virtual environment before using pip. |
 | `nodivium: command not found` | Run `uv tool update-shell` and open a new terminal, or activate the virtual environment used for installation. Check `uv tool list`, `pipx list`, or the environment's `bin/` / `Scripts/` directory. |
-| `Web dependencies are missing` | The CLI-only package was installed. Reinstall the tool with the web extra (`uv tool install 'nodivium[web]'`) or install `nodivium[web]` in the active virtual environment. |
+| `Web dependencies are missing` | You likely have version 2.0.0, which required the `[web]` extra. Upgrade to 2.0.1 or newer with `uv tool upgrade nodivium`, `pipx upgrade nodivium`, or `python -m pip install --upgrade nodivium` in the active virtual environment. |
 | `NCBI access needs a contact email` | Set `NODIVIUM_NCBI_EMAIL` to your real address in the terminal that runs the command or server. Restart `nodivium web` after changing it. |
 | Browser did not open | Copy the printed `http://127.0.0.1:8765` address into a browser on the same computer. Check your default browser and graphical session. `--no-browser` is available for SSH/headless use. |
 | `Address already in use` or the page shows another app | Stop the other server, or run `nodivium web --port 8766` and open the new printed address. |

@@ -21,11 +21,11 @@
 For a command you can run from any directory, install Nodivium with [uv](https://docs.astral.sh/uv/concepts/tools/) or [pipx](https://pipx.pypa.io/). Both give the app its own Python environment. The wheel includes the web assets, so Node.js is not needed for a normal install.
 
 ```bash
-uv tool install 'nodivium[web]'
+uv tool install nodivium
 nodivium web
 ```
 
-Alternatively, run `pipx install 'nodivium[web]'`. To install only the CLI, omit `[web]`. If uv says the executable directory is not on `PATH`, run `uv tool update-shell`, restart your terminal, and try `nodivium version`.
+Alternatively, run `pipx install nodivium`. A normal install includes both the web workspace and CLI; the older `nodivium[web]` syntax also works. If uv says the executable directory is not on `PATH`, run `uv tool update-shell`, restart your terminal, and try `nodivium version`.
 
 If you need Nodivium as an importable Python library in a project, create and activate a virtual environment first:
 
@@ -33,7 +33,7 @@ If you need Nodivium as an importable Python library in a project, create and ac
 python -m venv .venv
 # Linux: source .venv/bin/activate
 # Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install "nodivium[web]"
+python -m pip install nodivium
 nodivium web
 ```
 
@@ -47,7 +47,7 @@ From a source checkout, use Python 3.10+, Node.js, and npm for the one-time brow
 python -m venv .venv
 # Linux: source .venv/bin/activate
 # Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install -e ".[web]"
+python -m pip install -e .
 cd web
 npm ci
 npm run build
@@ -84,7 +84,7 @@ Existing NCBI environment settings remain supported as fallbacks. Nodivium migra
 | Best for | Exploring unfamiliar records, viewing sequences and 3D structures, comparing source details, and assembling a small mixed-source collection. | Repeated downloads, shell scripts, remote/SSH sessions, and saving many records to a chosen folder. |
 | Strengths | Search cards, source-aware record views, dark/light theme, resizable inspector, local file inspection, interactive structure colors, representations and visibility, and ZIP export with a provenance manifest. | Fast repeat access through the local cache, clear text output, NCBI FASTA batch retrieval, and automation-friendly commands. |
 | Tradeoffs | Needs a browser, local web dependencies, and WebGL for 3D viewing; collections currently have a 25-record/20 MB limit and discovery shows up to 50 results. | No interactive 3D viewer or browser charts; users choose IDs, formats, and output paths through command options. |
-| Install | `uv tool install 'nodivium[web]'` | `uv tool install nodivium` |
+| Install | `uv tool install nodivium` | Same install; use `nodivium` for the CLI |
 
 Both modes use the same NCBI, UniProt, and RCSB PDB providers and share the local cache. Start the web workspace with `nodivium web`; type `nodivium` for the CLI command guide.
 
@@ -200,7 +200,7 @@ nodivium cache clear   # wipe everything
 | `rich` | Terminal formatting & tables |
 | `typer` | CLI framework |
 
-The CLI dependencies install with pip or uv; the web workspace adds FastAPI, Uvicorn, and bundled browser assets.
+FastAPI, Uvicorn, and the bundled browser assets are included with a normal Nodivium installation.
 
 ---
 
@@ -211,7 +211,7 @@ git clone https://github.com/Eswar-mse/Nodivium.git nodivium
 cd nodivium
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -e '.[web,test]'
+python -m pip install -e '.[test]'
 python tests.py
 python -m pytest -q tests_upgrade.py
 ```

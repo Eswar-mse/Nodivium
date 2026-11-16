@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nodivium"
-version = "2.0.0"
+version = "2.0.1"
 description = "Explore, visualize, and export NCBI, UniProt, and PDB records"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "Sri Venkata Satya Sai Eswar M" }]
+authors = [{ name = "Sri Venkata Satya Sai Eswar Moparti" }]
 keywords = ["bioinformatics", "NCBI", "UniProt", "PDB", "CLI", "genomics"]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -23,6 +23,8 @@ dependencies = [
     "diskcache>=5.6",
     "rich>=13.0",
     "typer>=0.9",
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.34,<1",
 ]
 
 [project.urls]
@@ -33,7 +35,7 @@ Issues = "https://github.com/Eswar-mse/Nodivium/issues"
 Changelog = "https://github.com/Eswar-mse/Nodivium/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-web = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1"]
+web = [] # Kept so existing nodivium[web] install commands continue to work.
 test = ["pytest>=8,<10", "httpx>=0.28,<1"]
 
 [project.scripts]

@@ -1,6 +1,7 @@
 """Check that the release wheel contains the command and browser assets."""
 
 from pathlib import Path
+from email.parser import Parser
 import sys
 from zipfile import ZipFile
 
@@ -31,6 +32,12 @@ def main() -> None:
             raise SystemExit("Wheel has no Nodivium CLI entry point")
         if "Nodivium" not in archive.read("nodivium/static/index.html").decode():
             raise SystemExit("Wheel contains stale web branding")
+        metadata_file = next(name for name in members if name.endswith(".dist-info/METADATA"))
+        metadata = Parser().parsestr(archive.read(metadata_file).decode())
+        requirements = metadata.get_all("Requires-Dist", [])
+        for dependency in ("fastapi", "uvicorn"):
+            if not any(requirement.lower().startswith(dependency) and "extra ==" not in requirement.lower() for requirement in requirements):
+                raise SystemExit(f"Wheel is missing required web dependency: {dependency}")
     print(f"Wheel contents and CLI entry point verified: {wheels[0].name}")
 
 

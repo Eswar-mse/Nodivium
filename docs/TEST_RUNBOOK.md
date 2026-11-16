@@ -1,4 +1,4 @@
-# Nodivium 2.0 local test runbook
+# Nodivium local test runbook
 
 Use this runbook on the current source checkout before a public release. Run the stages in order. For each failure, save the exact command or action, the full error, and a screenshot when the problem is visual. Do not include an NCBI API key in screenshots or logs.
 
@@ -10,7 +10,7 @@ Run these commands in a normal terminal with network access. Python 3.12 matches
 cd /home/eswar-mse/Documents/Projects/nodivium
 uv python install 3.12
 uv venv --python 3.12 .venv
-uv pip install --python .venv/bin/python -e '.[web,test]'
+uv pip install --python .venv/bin/python -e '.[test]'
 source .venv/bin/activate
 python --version
 nodivium version
@@ -24,7 +24,7 @@ python tests.py
 python -m pytest -q tests_upgrade.py
 ```
 
-Expected: Python reports 3.12.x; `nodivium version` reports `2.0.0`; npm build succeeds; parser, legacy, and focused Python checks pass. Stop and report the exact command/output if any step fails.
+Expected: Python reports 3.12.x; `nodivium version` reports `2.0.1`; npm build succeeds; parser, legacy, and focused Python checks pass. Stop and report the exact command/output if any step fails.
 
 ## 2. Start the local web app
 
@@ -41,7 +41,7 @@ Leave that terminal running. In a second terminal, run:
 curl -fsS http://127.0.0.1:8765/api/health
 ```
 
-Expected: `nodivium web` opens the browser after the server is ready, and the health check returns JSON with `"status":"ok"` and version `2.0.0`. If browser opening is unavailable, open **http://127.0.0.1:8765/** yourself. Use this address, not `web/index.html` opened as a file. The page should show the Nodivium logo, three-column workspace on desktop, and styled light/dark themes.
+Expected: `nodivium web` opens the browser after the server is ready, and the health check returns JSON with `"status":"ok"` and version `2.0.1`. If browser opening is unavailable, open **http://127.0.0.1:8765/** yourself. Use this address, not `web/index.html` opened as a file. The page should show the Nodivium logo, three-column workspace on desktop, and styled light/dark themes.
 
 If port 8765 is busy, stop the app with Ctrl+C and run `nodivium web --port 8766`; use port 8766 in the browser and health check. For SSH or headless use, add `--no-browser`.
 
@@ -144,7 +144,7 @@ After Linux passes, repeat a clean install and representative web/CLI cases on W
 cd <path-to-nodivium-repository>
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -e ".[web,test]"
+python -m pip install -e ".[test]"
 cd web
 npm ci
 npm run build

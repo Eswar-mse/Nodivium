@@ -421,7 +421,7 @@ def web(
     try:
         import uvicorn
     except ImportError as exc:
-        disp.print_error("Web dependencies are missing. Install with: pip install 'nodivium[web]'")
+        disp.print_error("Web dependencies are missing. Upgrade or reinstall Nodivium with: python -m pip install --upgrade nodivium")
         raise typer.Exit(2) from exc
     url = f"http://127.0.0.1:{port}"
     disp.print_info(f"Nodivium web workspace: {url}")

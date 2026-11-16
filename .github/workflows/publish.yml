@@ -41,7 +41,7 @@ jobs:
           node sequence-metrics.test.mjs
       - name: Test and package Python distribution
         run: |
-          python -m pip install build ".[web,test]"
+          python -m pip install build ".[test]"
           python tests.py
           python -m pytest -q tests_upgrade.py
           python -m build
