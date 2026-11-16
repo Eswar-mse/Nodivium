@@ -25,6 +25,13 @@ dependencies = [
     "typer>=0.9",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Eswar-mse/Nodivium"
+Documentation = "https://github.com/Eswar-mse/Nodivium#readme"
+Repository = "https://github.com/Eswar-mse/Nodivium"
+Issues = "https://github.com/Eswar-mse/Nodivium/issues"
+Changelog = "https://github.com/Eswar-mse/Nodivium/blob/main/CHANGELOG.md"
+
 [project.optional-dependencies]
 web = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1"]
 test = ["pytest>=8,<10", "httpx>=0.28,<1"]

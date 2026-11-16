@@ -1,0 +1,65 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Confirm release tag matches package version
+        run: |
+          python - <<'PY'
+          import os
+          import tomllib
+
+          with open("pyproject.toml", "rb") as source:
+              version = tomllib.load(source)["project"]["version"]
+          expected = f"v{version}"
+          if os.environ["GITHUB_REF_NAME"] != expected:
+              raise SystemExit(f"Release tag must be {expected}")
+          PY
+      - name: Build web assets
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+          node fasta-parser.test.mjs
+          node sequence-metrics.test.mjs
+      - name: Test and package Python distribution
+        run: |
+          python -m pip install build ".[web,test]"
+          python tests.py
+          python -m pytest -q tests_upgrade.py
+          python -m build
+          python scripts/check_wheel.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-distributions
+          path: dist/*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-distributions
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1

@@ -17,6 +17,12 @@
 6. Push a release candidate and confirm the GitHub Actions matrix passes on Windows and Linux. The current local environment cannot substitute for the Windows run.
 7. Confirm the renamed GitHub repository, remote, and repository links after push, then repeat the link and package checks. Capture new Nodivium screenshots after the browser pass. Publish the versioned package and GitHub release only after these gates pass.
 
+## GitHub and PyPI publication
+
+The repository is `Eswar-mse/Nodivium`. Add a pending PyPI Trusted Publisher for project `nodivium` with owner `Eswar-mse`, repository `Nodivium`, workflow `publish.yml`, and environment `pypi`. A pending publisher does not reserve the PyPI name; confirm availability before publishing.
+
+After the release gates pass, change the package version from `2.0.0.dev0` to the intended stable version, commit it, and create a GitHub release with a matching tag such as `v2.0.0`. Publishing the GitHub release triggers `.github/workflows/publish.yml`, which rebuilds assets, runs tests, checks the wheel, and publishes the wheel and source archive to PyPI. Confirm the workflow and `pip install "nodivium[web]"` in a fresh environment before announcing the release.
+
 ## Release scope
 
 The first release uses a local web server. Public shared hosting requires a separate request budget, shared cache strategy, and provider policy review. Source-backed residue mapping between UniProt and PDB, full result pagination, and per-record collection progress are future enhancements. The interface must never imply that two residue positions correspond without a verified alignment.
