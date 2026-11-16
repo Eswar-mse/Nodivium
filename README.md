@@ -13,6 +13,8 @@
 
 </div>
 
+**New here?** Read the [complete Nodivium user guide](docs/USER_GUIDE.md) for installation on Linux and Windows, web and CLI workflows, supported formats, troubleshooting, and issue reporting.
+
 ## Install the release
 
 For a command you can run from any directory, install Nodivium with [uv](https://docs.astral.sh/uv/concepts/tools/) or [pipx](https://pipx.pypa.io/). Both give the app its own Python environment. The wheel includes the web assets, so Node.js is not needed for a normal install.
@@ -206,11 +208,14 @@ The CLI dependencies install with pip or uv; the web workspace adds FastAPI, Uvi
 ```bash
 git clone https://github.com/Eswar-mse/Nodivium.git nodivium
 cd nodivium
-pip install -e .
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[web,test]'
 python tests.py
+python -m pytest -q tests_upgrade.py
 ```
 
-34 tests, fully mocked — no network required to run the suite.
+The 34 legacy checks and focused upgrade checks use mocked provider requests; no network is required to run them. On Windows, use `py -m venv .venv` and `.\.venv\Scripts\Activate.ps1` in place of the Linux virtual-environment commands above.
 
 ---
 
@@ -224,6 +229,6 @@ MIT © [Eswar-mse](https://github.com/Eswar-mse)
 
 Built with 🧬 by [Sri Venkata Satya Sai Eswar M](https://github.com/Eswar-mse)
 
-**[Issues](https://github.com/Eswar-mse/Nodivium/issues) · [Changelog](CHANGELOG.md)**
+**[User guide](docs/USER_GUIDE.md) · [Issues](https://github.com/Eswar-mse/Nodivium/issues) · [Changelog](CHANGELOG.md)**
 
 </div>
