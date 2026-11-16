@@ -121,6 +121,7 @@ function renderRecord() {
   $('#source-link').hidden = !record.source_url;
   $('#add-item').hidden = record.source === 'local';
   $('#structure-controls').hidden = !(record.source === 'pdb' || record.localStructure);
+  $('#visibility-controls').hidden = !(record.source === 'pdb' || record.localStructure);
   $('#representation-controls').hidden = !(record.source === 'pdb' || record.localStructure);
   $('#measurement-tools').hidden = !(record.source === 'pdb' || record.localStructure);
   $('.download-strip').hidden = record.source === 'local';
@@ -208,6 +209,7 @@ async function renderVisual() {
   state.viewerHiddenResidues = false;
   updateMeasurementControls();
   $('#representation-options').replaceChildren(node('p', 'empty-results', 'Load a structure to choose representations.'));
+  $('#visibility-options').replaceChildren(node('p', 'empty-results', 'Loading structure components…'));
   area.replaceChildren();
   area.className = '';
   $('#expand-visual').hidden = !record || (record.db === 'pubmed' || record.db === 'gene');
@@ -235,6 +237,7 @@ async function renderVisual() {
         try { await applyViewerColors(viewer); }
         catch (error) { message(`Structure loaded, but custom colors could not be applied: ${error.message}`); }
         renderRepresentationControls(viewer.plugin);
+        renderVisibilityControls(viewer.plugin);
         requestAnimationFrame(() => fitStructure(viewer.plugin));
       }
     } catch (error) { host.replaceChildren(node('p', 'empty-results', `3D viewer could not load: ${error.message}`)); }
@@ -726,6 +729,36 @@ function representationGroups(plugin) {
   result.push({ id: 'other', label: 'Other components', groups: groups.filter(group => !named.has(group)) });
   return result.filter(part => part.groups.length);
 }
+function renderVisibilityControls(plugin = state.viewer?.plugin) {
+  const area = $('#visibility-options');
+  area.replaceChildren();
+  if (!plugin || state.viewerIsolation?.plugin === plugin) return;
+  const groups = representationGroups(plugin);
+  for (const { id, label } of [
+    { id: 'polymer', label: 'Protein / polymer' },
+    { id: 'ligand', label: 'Ligands' },
+    { id: 'ion', label: 'Ions' },
+    { id: 'water', label: 'Water' },
+  ]) {
+    const components = groups.find(part => part.id === id)?.groups.flat() || [];
+    const toggle = node('label', 'visibility-toggle');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.disabled = !components.length;
+    checkbox.checked = components.length > 0 && components.every(component => !component.cell.state.isHidden);
+    checkbox.indeterminate = components.some(component => component.cell.state.isHidden) && components.some(component => !component.cell.state.isHidden);
+    checkbox.setAttribute('aria-label', `Show ${label.toLowerCase()}`);
+    if (!components.length) toggle.title = `${label} are not present in this structure`;
+    checkbox.addEventListener('change', () => {
+      if (state.viewer?.plugin !== plugin) return;
+      plugin.managers.structure.hierarchy.toggleVisibility(components, checkbox.checked ? 'show' : 'hide');
+      renderVisibilityControls(plugin);
+      renderRepresentationControls(plugin);
+    });
+    toggle.append(checkbox, node('span', '', label));
+    area.append(toggle);
+  }
+}
 function renderRepresentationControls(plugin = state.viewer?.plugin) {
   const area = $('#representation-options');
   area.replaceChildren();
@@ -765,20 +798,23 @@ function renderRepresentationControls(plugin = state.viewer?.plugin) {
     });
     const label = node('label', '', part.label);
     label.append(select);
-    const visibility = node('label', 'component-visibility', 'Show');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.setAttribute('aria-label', `Show ${part.label.toLowerCase()}`);
-    checkbox.checked = components.every(component => !component.cell.state.isHidden);
-    checkbox.indeterminate = components.some(component => component.cell.state.isHidden) && components.some(component => !component.cell.state.isHidden);
-    checkbox.addEventListener('change', () => {
-      if (state.viewer?.plugin !== plugin) return;
-      plugin.managers.structure.hierarchy.toggleVisibility(components, checkbox.checked ? 'show' : 'hide');
-      renderRepresentationControls(plugin);
-    });
-    visibility.prepend(checkbox);
     const row = node('div', 'representation-row');
-    row.append(label, visibility);
+    row.append(label);
+    if (!['polymer', 'ligand', 'ion', 'water'].includes(part.id)) {
+      const visibility = node('label', 'component-visibility', 'Show');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.setAttribute('aria-label', `Show ${part.label.toLowerCase()}`);
+      checkbox.checked = components.every(component => !component.cell.state.isHidden);
+      checkbox.indeterminate = components.some(component => component.cell.state.isHidden) && components.some(component => !component.cell.state.isHidden);
+      checkbox.addEventListener('change', () => {
+        if (state.viewer?.plugin !== plugin) return;
+        plugin.managers.structure.hierarchy.toggleVisibility(components, checkbox.checked ? 'show' : 'hide');
+        renderRepresentationControls(plugin);
+      });
+      visibility.prepend(checkbox);
+      row.append(visibility);
+    }
     area.append(row);
   }
   if (!area.childElementCount) area.append(node('p', 'empty-results', 'No separate structure components were found.'));
@@ -872,7 +908,9 @@ async function restoreStructureView(plugin = state.viewer?.plugin) {
     state.viewerHiddenResidues = false;
   }
   $('#representation-controls').hidden = false;
+  $('#visibility-controls').hidden = false;
   renderRepresentationControls(plugin);
+  renderVisibilityControls(plugin);
   updateMeasurementControls();
   fitStructure(plugin);
 }
@@ -947,6 +985,7 @@ $('#isolate-selected').addEventListener('click', async () => {
     plugin.selectionMode = false;
     plugin.managers.interactivity.lociSelects.deselectAll();
     $('#representation-controls').hidden = true;
+    $('#visibility-controls').hidden = true;
     updateMeasurementControls();
     fitStructure(plugin);
     message('Showing selected residues only. Use Restore full view to return.');
