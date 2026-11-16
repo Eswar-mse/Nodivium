@@ -18,26 +18,42 @@
 
 ## Install the release
 
-For a command you can run from any directory, install Nodivium with [uv](https://docs.astral.sh/uv/concepts/tools/) or [pipx](https://pipx.pypa.io/). Both give the app its own Python environment. The wheel includes the web assets, so Node.js is not needed for a normal install.
+One install gives you **both the web workspace and CLI**. No `[web]` extra or Node.js is needed for the PyPI release. Choose the command that fits your Python setup:
+
+| Your setup | Install command |
+| --- | --- |
+| Python virtual environment already active | `pip install nodivium` |
+| App command available from any directory, on Windows or Linux | `uv tool install nodivium` or `pipx install nodivium` |
+
+Then run:
 
 ```bash
-uv tool install nodivium
 nodivium web
 ```
 
-Alternatively, run `pipx install nodivium`. A normal install includes both the web workspace and CLI; the older `nodivium[web]` syntax also works. If uv says the executable directory is not on `PATH`, run `uv tool update-shell`, restart your terminal, and try `nodivium version`.
+This starts the local workspace and opens your browser. Run `nodivium` for CLI help. The older `nodivium[web]` install syntax still works, but is unnecessary from version 2.0.1 onward. If uv says the executable directory is not on `PATH`, run `uv tool update-shell` and restart your terminal.
 
-If you need Nodivium as an importable Python library in a project, create and activate a virtual environment first:
+If you want to use pip and do not already have a virtual environment, create one first:
+
+Linux:
 
 ```bash
-python -m venv .venv
-# Linux: source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install nodivium
+python3 -m venv .venv
+source .venv/bin/activate
+pip install nodivium
 nodivium web
 ```
 
-`nodivium web` opens <http://127.0.0.1:8765> in your browser when the server is ready. If you are using SSH or a machine without a browser, run `nodivium web --no-browser` and open the printed URL yourself. Set `NODIVIUM_NCBI_EMAIL` to your real contact address before requesting NCBI records, as shown below. On Linux distributions that mark system Python as externally managed, bare `pip install nodivium` fails by design; use uv, pipx, or the activated virtual environment above.
+Windows PowerShell:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install nodivium
+nodivium web
+```
+
+`nodivium web` opens <http://127.0.0.1:8765> in your browser when the server is ready. If you are using SSH or a machine without a browser, run `nodivium web --no-browser` and open the printed URL yourself. Set `NODIVIUM_NCBI_EMAIL` to your real contact address before requesting NCBI records, as shown below. On Ubuntu and similar systems, `pip install nodivium` outside a virtual environment may be blocked by the system Python; use uv, pipx, or activate a virtual environment first.
 
 ## Try the web workspace from source
 

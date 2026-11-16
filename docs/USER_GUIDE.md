@@ -20,7 +20,9 @@ This guide covers installation, everyday use, supported formats, common errors, 
 
 ## 1. Choose an install
 
-Nodivium needs Python 3.10 or newer. A normal PyPI installation includes the built browser assets; **Node.js is not needed**. Internet access is needed to install dependencies and to retrieve remote records. Browser inspection of a local file does not send that file to Nodivium's server.
+Nodivium needs Python 3.10 or newer. One PyPI install includes **both the web workspace and CLI**, along with the built browser assets; **no `[web]` extra or Node.js is needed**. Internet access is needed to install dependencies and to retrieve remote records. Browser inspection of a local file does not send that file to Nodivium's server.
+
+**Already using an activated Python virtual environment?** Run `pip install nodivium`, then `nodivium web`. For an app command available from any directory, choose uv or pipx below. Use one installation method for a given command name.
 
 ### App install with uv (recommended)
 
@@ -32,7 +34,7 @@ nodivium version
 nodivium web
 ```
 
-The standard installation includes the browser workspace and CLI. Older commands using `nodivium[web]` still work. If `nodivium` is not found after installation, run `uv tool update-shell`, open a new terminal, and try `nodivium version` again. To update a uv-managed installation later, use `uv tool upgrade nodivium`.
+Older commands using `nodivium[web]` still work but are unnecessary from version 2.0.1 onward. If `nodivium` is not found after installation, run `uv tool update-shell`, open a new terminal, and try `nodivium version` again. To update a uv-managed installation later, use `uv tool upgrade nodivium`.
 
 ### App install with pipx
 
@@ -47,14 +49,14 @@ Install **either** with uv or pipx for a given command name; there is no need to
 
 ### Project virtual environment with pip
 
-Use this route if you need `import nodivium` inside a Python project, or if uv and pipx are unavailable. Activate the environment before running `nodivium`.
+Use this route if you need `import nodivium` inside a Python project, or if uv and pipx are unavailable. An active virtual environment also makes the simple `pip install nodivium` command work on Ubuntu. Activate the environment before running `nodivium`.
 
 **Linux:**
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install nodivium
+pip install nodivium
 nodivium web
 ```
 
@@ -63,13 +65,13 @@ nodivium web
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install nodivium
+pip install nodivium
 nodivium web
 ```
 
 If PowerShell does not allow activation, you can run `.\.venv\Scripts\python.exe -m pip install nodivium` and `.\.venv\Scripts\nodivium.exe web` directly.
 
-On Ubuntu and other distributions with an **externally managed** system Python, plain `pip install nodivium` outside a virtual environment is blocked by design. Use uv, pipx, or a virtual environment. Do not use `--break-system-packages` for this app.
+On Ubuntu and other distributions with an **externally managed** system Python, plain `pip install nodivium` outside a virtual environment is blocked by design. Use uv, pipx, or activate a virtual environment first. Do not use `--break-system-packages` for this app.
 
 ### Install from source
 
