@@ -10,6 +10,7 @@
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey)](#)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24271314.svg)](https://doi.org/10.5281/zenodo.24271314)
 
 </div>
 
@@ -225,9 +226,15 @@ MIT © [Eswar-mse](https://github.com/Eswar-mse)
 
 ---
 
+## Cite Nodivium
+
+If you use Nodivium in research, cite the archived **2.0.0** release: [Moparti, Sri Venkata Satya Sai Eswar. *Nodivium 2.0.0: Biological Record Exploration and Visualization*. Zenodo. DOI: 10.5281/zenodo.24271314](https://doi.org/10.5281/zenodo.24271314). GitHub's **Cite this repository** menu uses [CITATION.cff](CITATION.cff), which also records the author's [ORCID](https://orcid.org/0009-0005-4635-7368).
+
+---
+
 <div align="center">
 
-Built with 🧬 by [Sri Venkata Satya Sai Eswar M](https://github.com/Eswar-mse)
+Built with 🧬 by [Sri Venkata Satya Sai Eswar Moparti](https://github.com/Eswar-mse)
 
 **[User guide](docs/USER_GUIDE.md) · [Issues](https://github.com/Eswar-mse/Nodivium/issues) · [Changelog](CHANGELOG.md)**
 

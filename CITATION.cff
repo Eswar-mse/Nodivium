@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use Nodivium in your research, please cite this software release."
+title: "Nodivium 2.0.0: Biological Record Exploration and Visualization"
+type: software
+authors:
+  - family-names: Moparti
+    given-names: Sri Venkata Satya Sai Eswar
+    orcid: https://orcid.org/0009-0005-4635-7368
+doi: 10.5281/zenodo.24271314
+repository-code: https://github.com/Eswar-mse/Nodivium
+version: 2.0.0
+date-released: 2026-11-16
+license: MIT
