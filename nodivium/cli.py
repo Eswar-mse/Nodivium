@@ -1,6 +1,7 @@
-"""BioFetch — CLI entry point built with Typer."""
+"""Nodivium — CLI entry point built with Typer."""
 import sys
 import os
+import re
 from pathlib import Path
 from typing import Optional, List
 from enum import Enum
@@ -8,24 +9,45 @@ from enum import Enum
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
-from biofetch.cache import BioCache
-from biofetch import ncbi as ncbi_mod
-from biofetch import uniprot as uniprot_mod
-from biofetch import pdb as pdb_mod
-from biofetch import display as disp
+from nodivium.cache import BioCache
+from nodivium import ncbi as ncbi_mod
+from nodivium import uniprot as uniprot_mod
+from nodivium import pdb as pdb_mod
+from nodivium import display as disp
+from nodivium.service import Target, fetch as fetch_record
 
 app = typer.Typer(
-    name="biofetch",
-    help="[bold cyan]BioFetch[/] — Unified NCBI · UniProt · PDB fetcher with local caching.",
+    name="nodivium",
+    help="[bold cyan]Nodivium[/] — Explore and export records from NCBI · UniProt · PDB.",
     rich_markup_mode="rich",
     add_completion=False,
-    no_args_is_help=True,
+    no_args_is_help=False,
 )
 
 cache_app = typer.Typer(help="Manage the local cache.", no_args_is_help=True)
 app.add_typer(cache_app, name="cache")
 
-_cache = BioCache(ttl_days=7)
+
+@app.callback(invoke_without_command=True)
+def root(ctx: typer.Context):
+    """Display the Nodivium wordmark and command guide at launch."""
+    if ctx.invoked_subcommand is None:
+        disp.print_cli_logo()
+        typer.echo(ctx.get_help())
+
+class _LazyCache:
+    """Open the disk cache only for commands that actually use it."""
+
+    def __init__(self):
+        self._instance = None
+
+    def __getattr__(self, name):
+        if self._instance is None:
+            self._instance = BioCache(ttl_days=7)
+        return getattr(self._instance, name)
+
+
+_cache = _LazyCache()
 
 
 # ─── Enums ───────────────────────────────────────────────────────────────────
@@ -70,7 +92,7 @@ class PDBFormat(str, Enum):
 def fetch(
     accession: str = typer.Argument(..., help="Accession ID (e.g. NM_001301717, P68871, 1HHO)"),
     source: Source = typer.Option(..., "--source", "-s", help="Database source"),
-    fmt: str = typer.Option("fasta", "--format", "-f", help="Output format"),
+    fmt: Optional[str] = typer.Option(None, "--format", "-f", help="Output format; defaults to the record type's preferred format"),
     db: NCBIDb = typer.Option(NCBIDb.nucleotide, "--db", help="NCBI database (only for --source ncbi)"),
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Save to file instead of printing"),
     no_cache: bool = typer.Option(False, "--no-cache", help="Bypass cache and force fresh fetch"),
@@ -80,12 +102,20 @@ def fetch(
     """Fetch a single record by accession ID from NCBI, UniProt, or PDB."""
     disp.print_header()
 
-    accession = accession.strip()
+    try:
+        target = Target(source.value, accession, db.value)
+        fmt = fmt.lower() if fmt else target.default_format
+        if fmt not in target.formats:
+            raise ValueError(f"Choose a supported format: {', '.join(target.formats)}")
+    except ValueError as e:
+        disp.print_error(str(e))
+        raise typer.Exit(2)
+    accession = target.identifier
     cache_key_fmt = fmt
 
     # ── Cache check ──
     if not no_cache:
-        cached = _cache.get(source.value, accession, cache_key_fmt)
+        cached = _cache.get(source.value, accession, cache_key_fmt, target.db)
         if cached:
             disp.print_success(f"[bold]{accession}[/] served from cache")
             _deliver(cached, output, preview, source, accession, fmt, info)
@@ -101,15 +131,7 @@ def fetch(
     ) as progress:
         progress.add_task("fetch", total=None)
         try:
-            if source == Source.ncbi:
-                data = ncbi_mod.fetch_ncbi(accession, db=db.value, fmt=fmt)
-            elif source == Source.uniprot:
-                data = uniprot_mod.fetch_uniprot(accession, fmt=fmt)
-            elif source == Source.pdb:
-                if fmt == "fasta":
-                    data = pdb_mod.fetch_pdb_fasta(accession)
-                else:
-                    data = pdb_mod.fetch_pdb_structure(accession, fmt=fmt)
+            data = fetch_record(target, fmt)
         except Exception as e:
             disp.print_error(str(e))
             raise typer.Exit(1)
@@ -118,7 +140,7 @@ def fetch(
         disp.print_error(f"No data returned for {accession}")
         raise typer.Exit(1)
 
-    _cache.set(source.value, accession, cache_key_fmt, data)
+    _cache.set(source.value, accession, cache_key_fmt, data, target.db)
     disp.print_success(f"[bold]{accession}[/] fetched and cached")
     _deliver(data, output, preview, source, accession, fmt, info)
 
@@ -130,7 +152,7 @@ def _deliver(data: str, output, preview: bool, source, accession: str, fmt: str,
         disp.print_info(f"Saved to [bold]{output}[/] ({len(data):,} bytes)")
     else:
         if preview:
-            disp.print_fasta_preview(data, max_lines=24)
+            disp.print_fasta_preview(data, max_lines=24) if fmt == "fasta" else disp.print_text_preview(data, fmt, max_lines=24)
 
     # ── Optional info panel ──
     if info:
@@ -174,6 +196,9 @@ def search(
 ):
     """Search NCBI, UniProt, or PDB and list matching accessions."""
     disp.print_header()
+    if not 1 <= limit <= 50 or not 2 <= len(query.strip()) <= 250:
+        disp.print_error("Use a query of 2–250 characters and a result limit of 1–50.")
+        raise typer.Exit(2)
 
     with Progress(
         SpinnerColumn(spinner_name="dots", style="bold cyan"),
@@ -207,7 +232,11 @@ def info_cmd(
 ):
     """Fetch and display a rich metadata summary without downloading the full sequence."""
     disp.print_header()
-    accession = accession.strip()
+    try:
+        accession = Target(source.value, accession, db.value).identifier
+    except ValueError as e:
+        disp.print_error(str(e))
+        raise typer.Exit(2)
 
     with Progress(
         SpinnerColumn(spinner_name="dots", style="bold cyan"),
@@ -242,45 +271,59 @@ def info_cmd(
 def batch(
     accessions: List[str] = typer.Argument(..., help="Space-separated accession IDs"),
     source: Source = typer.Option(..., "--source", "-s", help="Database source"),
-    fmt: str = typer.Option("fasta", "--format", "-f", help="Output format"),
+    fmt: Optional[str] = typer.Option(None, "--format", "-f", help="Output format; defaults to the record type's preferred format"),
     db: NCBIDb = typer.Option(NCBIDb.nucleotide, "--db", help="NCBI database"),
     outdir: Path = typer.Option(Path("."), "--outdir", "-d", help="Directory to save files"),
     no_cache: bool = typer.Option(False, "--no-cache", help="Bypass cache"),
 ):
     """Batch fetch multiple accession IDs and save each to a file."""
     disp.print_header()
+    try:
+        first = Target(source.value, accessions[0], db.value)
+        fmt = fmt.lower() if fmt else first.default_format
+        if fmt not in first.formats:
+            raise ValueError(f"Choose a supported format: {', '.join(first.formats)}")
+        targets = [Target(source.value, acc, db.value) for acc in accessions]
+    except ValueError as e:
+        disp.print_error(str(e))
+        raise typer.Exit(2)
     outdir.mkdir(parents=True, exist_ok=True)
 
     results = {}
+    pending = []
+    for target in targets:
+        cached = None if no_cache else _cache.get(source.value, target.identifier, fmt, target.db)
+        if cached is not None:
+            results[target.identifier] = cached
+            _save_record(cached, target.identifier, fmt, outdir)
+        else:
+            pending.append(target)
+
     with Progress(
         SpinnerColumn(spinner_name="dots", style="bold cyan"),
         TextColumn("[cyan]{task.description}"),
         TimeElapsedColumn(),
         transient=False,
     ) as progress:
-        task = progress.add_task(f"Fetching {len(accessions)} records...", total=len(accessions))
+        task = progress.add_task(f"Fetching {len(targets)} records...", total=len(targets))
 
-        for acc in accessions:
-            acc = acc.strip()
-            progress.update(task, description=f"[cyan]Fetching [bold]{acc}[/]...")
-
-            if not no_cache:
-                cached = _cache.get(source.value, acc, fmt)
-                if cached:
-                    results[acc] = cached
-                    _save_record(cached, acc, fmt, outdir)
-                    progress.advance(task)
-                    continue
-
+        progress.advance(task, len(targets) - len(pending))
+        batch_data = {}
+        if source == Source.ncbi and fmt == "fasta" and len(pending) > 1:
+            progress.update(task, description=f"[cyan]Fetching {len(pending)} FASTA records from NCBI...")
             try:
-                if source == Source.ncbi:
-                    data = ncbi_mod.fetch_ncbi(acc, db=db.value, fmt=fmt)
-                elif source == Source.uniprot:
-                    data = uniprot_mod.fetch_uniprot(acc, fmt=fmt)
-                elif source == Source.pdb:
-                    data = pdb_mod.fetch_pdb_fasta(acc) if fmt == "fasta" else pdb_mod.fetch_pdb_structure(acc, fmt=fmt)
+                batch_data = ncbi_mod.fetch_ncbi_fasta_batch([target.identifier for target in pending], db=db.value)
+            except Exception as exc:
+                batch_data = {target.identifier: f"ERROR: {exc}" for target in pending}
+        for target in pending:
+            acc = target.identifier
+            progress.update(task, description=f"[cyan]Fetching [bold]{acc}[/]...")
+            try:
+                data = batch_data[acc] if batch_data else fetch_record(target, fmt)
+                if data.startswith("ERROR: "):
+                    raise RuntimeError(data[7:])
 
-                _cache.set(source.value, acc, fmt, data)
+                _cache.set(source.value, acc, fmt, data, target.db)
                 results[acc] = data
                 _save_record(data, acc, fmt, outdir)
             except Exception as e:
@@ -293,10 +336,13 @@ def batch(
 
 
 def _save_record(data: str, accession: str, fmt: str, outdir: Path):
-    ext_map = {"fasta": "fasta", "genbank": "gb", "gb": "gb", "json": "json",
-               "xml": "xml", "txt": "txt", "pdb": "pdb", "cif": "cif"}
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,79}", accession):
+        raise ValueError("Invalid record ID for a file name")
+    ext_map = {"fasta": "fasta", "genbank": "gb", "genpept": "gp", "gb": "gb", "json": "json",
+               "xml": "xml", "txt": "txt", "pdb": "pdb", "cif": "cif",
+               "gene_table": "txt", "medline": "txt", "abstract": "txt"}
     ext = ext_map.get(fmt, fmt)
-    fname = outdir / f"{accession}.{ext}"
+    fname = outdir / f"nodivium_{accession}.{ext}"
     fname.write_text(data, encoding="utf-8")
 
 
@@ -343,10 +389,11 @@ def cache_delete(
     accession: str = typer.Argument(..., help="Accession ID to remove from cache"),
     source: Source = typer.Option(..., "--source", "-s"),
     fmt: str = typer.Option("fasta", "--format", "-f"),
+    db: NCBIDb = typer.Option(NCBIDb.nucleotide, "--db", help="NCBI database"),
 ):
     """Delete a specific cached entry."""
     disp.print_header()
-    deleted = _cache.delete(source.value, accession, fmt)
+    deleted = _cache.delete(source.value, accession, fmt, db.value if source == Source.ncbi else "")
     if deleted:
         disp.print_success(f"Deleted cache entry: {source.value}:{accession}:{fmt}")
     else:
@@ -357,9 +404,24 @@ def cache_delete(
 
 @app.command("version")
 def version():
-    """Print BioFetch version."""
-    from biofetch import __version__
-    disp.console.print(f"[bold cyan]BioFetch[/] v{__version__}")
+    """Print Nodivium version."""
+    from nodivium import __version__
+    disp.console.print(f"[bold cyan]Nodivium[/] v{__version__}")
+
+
+@app.command("web")
+def web(port: int = typer.Option(8765, "--port", help="Local web port")):
+    """Open the Nodivium web workspace on this computer."""
+    if not 1024 <= port <= 65535:
+        disp.print_error("Choose a port from 1024 to 65535.")
+        raise typer.Exit(2)
+    try:
+        import uvicorn
+    except ImportError as exc:
+        disp.print_error("Web dependencies are missing. Install with: pip install 'nodivium[web]'")
+        raise typer.Exit(2) from exc
+    disp.print_info(f"Open http://127.0.0.1:{port} in your browser")
+    uvicorn.run("nodivium.web:app", host="127.0.0.1", port=port)
 
 
 # ─── Entry point ──────────────────────────────────────────────────────────────

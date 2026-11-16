@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f2">
+  <title>Nodivium — Explore biological records</title>
+  <meta name="description" content="Search, inspect, visualize and collect NCBI, UniProt and RCSB PDB records.">
+  <link rel="icon" type="image/png" href="./assets/nodivium-mark.png">
+  <link rel="apple-touch-icon" href="./assets/nodivium-mark.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#record">Skip to record</a>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><img src="./assets/nodivium-mark.png" width="44" height="44" alt=""></span><span>Nodivium</span><small>RESEARCH WORKSPACE</small></div>
+      <div class="top-actions"><span class="status"><span class="status-dot"></span> NCBI · UniProt · RCSB PDB</span><button id="theme-toggle" class="theme-button" type="button" aria-label="Switch to dark theme">☾ Dark mode</button><button id="collection-toggle" class="top-button" type="button">Collection <span id="collection-count">0</span></button></div>
+    </header>
+    <main class="workspace">
+      <aside class="search-panel" aria-labelledby="search-title">
+        <div class="panel-heading"><p class="eyebrow">01 / DISCOVER</p><h1 id="search-title">Find a record</h1><p>Search trusted biological databases, or open an accession directly.</p></div>
+        <form id="search-form">
+          <label for="source">Source</label><select id="source" name="source"><option value="uniprot">UniProtKB · proteins</option><option value="ncbi">NCBI · records</option><option value="pdb">RCSB PDB · structures</option></select>
+          <div id="db-field" hidden><label for="database">NCBI database</label><select id="database" name="database"><option value="nucleotide">Nucleotide</option><option value="protein">Protein</option><option value="gene">Gene</option><option value="pubmed">PubMed literature</option></select></div>
+          <label for="query">Search term or accession</label><div class="search-input"><input id="query" name="query" type="search" placeholder="Try hemoglobin or P68871" required autocomplete="off"><button type="submit" aria-label="Search">↗</button></div>
+          <label id="reviewed-field" class="checkbox-row"><input id="reviewed" type="checkbox"> Reviewed UniProt entries only</label>
+          <div class="form-actions"><button id="search-submit" class="primary-button" type="submit">Search records</button><button id="open-id" class="secondary-button" type="button">Open ID</button></div>
+        </form>
+        <div class="results-heading"><h2>Results</h2><span id="result-count">—</span></div>
+        <div id="results" class="results" aria-live="polite"><div class="empty-results">Search a source to see matching records here.</div></div>
+        <button id="more-results" class="secondary-button more-results" type="button" hidden>Show more results</button>
+        <div class="file-section"><p class="eyebrow">YOUR FILES</p><h2>Inspect locally</h2><p>FASTA, PDB, or mmCIF stays in this browser.</p><label class="file-button" for="local-file">Choose a file <input id="local-file" type="file" accept=".fasta,.fa,.faa,.fna,.pdb,.cif,.mmcif"></label></div>
+      </aside>
+      <section id="record" class="record-panel" aria-labelledby="record-title" tabindex="-1">
+        <div class="record-top"><p class="eyebrow">02 / INSPECT</p><span id="record-source" class="source-tag">READY TO EXPLORE</span></div>
+        <div id="record-empty" class="record-empty"><div class="hero-glyph" aria-hidden="true"><img src="./assets/nodivium-mark.png" width="82" height="82" alt=""></div><h2>Follow the evidence from record to structure.</h2><p>Search a database, open an accession, or inspect a local file. Nodivium keeps the original source and record type visible as you explore.</p><div class="example-actions"><button data-example="P68871" data-source="uniprot" type="button">Explore hemoglobin β <span>UniProt · P68871 ↗</span></button><button data-example="1HHO" data-source="pdb" type="button">Inspect a structure <span>RCSB PDB · 1HHO ↗</span></button><button data-example="BRCA1" data-source="ncbi" data-db="gene" type="button">Search a gene <span>NCBI Gene · BRCA1 ↗</span></button></div></div>
+        <div id="record-detail" hidden><div class="record-header"><div><p id="record-kicker" class="eyebrow"></p><h2 id="record-title"></h2><p id="record-id" class="record-id"></p></div><div class="record-actions"><button id="copy-id" class="secondary-button" type="button">Copy ID</button><button id="add-item" class="secondary-button" type="button">＋ Collect</button><a id="source-link" target="_blank" rel="noopener noreferrer">View source ↗</a></div></div><div class="tabs" role="tablist" aria-label="Record sections"><button class="tab active" data-tab="overview" role="tab" aria-selected="true">Overview</button><button class="tab" data-tab="annotations" role="tab" aria-selected="false">Annotations <span id="feature-count"></span></button><button class="tab" data-tab="connections" role="tab" aria-selected="false">Linked records <span id="link-count"></span></button><button class="tab" data-tab="raw" role="tab" aria-selected="false">Raw data</button></div><div id="tab-content" class="tab-content"></div><div class="download-strip"><div><strong>Export original record</strong><small>Directly retrieved from its source</small></div><select id="format" aria-label="Download format"></select><button id="download" class="primary-button" type="button">Download</button></div></div>
+        <div id="message" class="message" role="status" hidden></div>
+      </section>
+      <aside class="inspect-panel" aria-labelledby="inspect-title"><div class="panel-heading"><p class="eyebrow">03 / VISUALIZE</p><div class="inspector-heading"><h2 id="inspect-title">Visual inspector</h2><button id="expand-visual" class="secondary-button" type="button" aria-expanded="false" hidden>Expand ↗</button></div><p id="inspect-caption">A view tailored to the selected record appears here.</p></div><div class="inspector-size"><label class="inspector-width">Width <input id="inspector-width" type="range" min="310" max="720" step="10" value="350" aria-label="Inspector panel width"></label><label>Height <input id="inspector-height" type="range" min="340" max="800" step="20" value="420" aria-label="Inspector view height"></label></div><div id="structure-controls" class="structure-controls" hidden><label>Canvas <input id="viewer-bg" type="color" value="#000000" aria-label="3D canvas color"></label><label>Protein <input id="viewer-polymer" type="color" value="#5de0c0" aria-label="Protein color"></label><label>Ligands &amp; ions <input id="viewer-ligand" type="color" value="#f4bd62" aria-label="Ligand and ion color"></label><button id="viewer-reset" class="secondary-button" type="button">Reset colors</button><button id="viewer-fit" class="secondary-button" type="button">Fit structure</button><small>Color picks apply a uniform tint; Reset restores Mol* colors and a black canvas.</small></div><details id="representation-controls" class="representation-controls" hidden><summary>Representations</summary><div id="representation-options" class="representation-options"></div><small>Choose any representation Mol* supports for each component. Surface styles may take longer to draw.</small></details><div id="measurement-tools" class="measurement-tools" hidden><button id="measure-select" class="secondary-button" type="button" aria-pressed="false">Select residues</button><button id="measure-label" class="secondary-button" type="button">Label selection</button><button id="measure-distance" class="secondary-button" type="button">Measure distance</button><button id="measure-clear" class="secondary-button" type="button">Clear selection</button><button id="hide-selected" class="secondary-button" type="button">Hide selected</button><button id="isolate-selected" class="secondary-button" type="button">Show only selected</button><button id="restore-view" class="secondary-button" type="button" disabled>Restore full view</button><span id="measurement-count">0 selected</span><small>1. Select residues. 2. Click one residue to label it, or two to measure their distance. Use Hide selected or Show only selected to focus the view; Restore full view keeps your component visibility choices. Drag to rotate; Fit structure resets zoom.</small></div><div id="visual" class="visual-empty"><span aria-hidden="true">◉</span><p>Select a record to see sequence or structure data.</p></div><div class="inspector-note">Visuals reflect source annotations. Missing information is shown as missing, never inferred.</div></aside>
+    </main>
+    <footer class="footer"><span>Nodivium · Scientific records, clearly sourced. <a href="https://www.ncbi.nlm.nih.gov/home/about/policies/" target="_blank" rel="noopener noreferrer">NCBI disclaimer and copyright ↗</a></span><span>Built by Eswar M · <a href="https://github.com/Eswar-mse/Nodivium" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span></footer>
+  </div>
+  <dialog id="collection-dialog"><div class="dialog-head"><div><p class="eyebrow">YOUR WORKSPACE</p><h2>Collection</h2></div><button id="collection-close" class="icon-button" aria-label="Close collection">✕</button></div><p>Gather records from different sources and export them with a provenance manifest.</p><div id="collection-list"></div><div class="dialog-actions"><button id="collection-clear" class="secondary-button">Clear</button><button id="collection-export" class="primary-button">Download ZIP</button></div></dialog>
+  <script src="./fasta-parser.js" defer></script>
+  <script src="./sequence-metrics.js" defer></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>

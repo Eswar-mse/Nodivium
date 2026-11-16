@@ -1,19 +1,19 @@
 [build-system]
-requires = ["setuptools>=61", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "biofetch-cli"
-version = "1.0.2"
-description = "Unified NCBI · UniProt · PDB CLI fetcher with local caching"
+name = "nodivium"
+version = "2.0.0.dev0"
+description = "Explore, visualize, and export NCBI, UniProt, and PDB records"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
-authors = [{ name = "BioFetch" }]
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Sri Venkata Satya Sai Eswar M" }]
 keywords = ["bioinformatics", "NCBI", "UniProt", "PDB", "CLI", "genomics"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
@@ -25,9 +25,16 @@ dependencies = [
     "typer>=0.9",
 ]
 
+[project.optional-dependencies]
+web = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1"]
+test = ["pytest>=8,<10", "httpx>=0.28,<1"]
+
 [project.scripts]
-biofetch = "biofetch.cli:main"
+nodivium = "nodivium.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["biofetch*"]
+include = ["nodivium*"]
+
+[tool.setuptools.package-data]
+nodivium = ["static/**/*"]

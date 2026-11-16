@@ -12,3 +12,5 @@ venv/
 *.pyc
 .DS_Store
 Thumbs.db
+\.~lock.*#
+web/node_modules/

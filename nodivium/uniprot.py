@@ -33,7 +33,9 @@ def fetch_uniprot(
 ) -> Optional[str]:
     """Fetch a UniProt record by accession ID."""
     fmt = fmt.lower()
-    suffix = FORMAT_SUFFIX.get(fmt, ".fasta")
+    if fmt not in FORMAT_SUFFIX:
+        raise ValueError(f"Unsupported UniProt format: {fmt}")
+    suffix = FORMAT_SUFFIX[fmt]
     url = f"{UNIPROT_BASE}/{accession}{suffix}"
 
     for attempt in range(retries):

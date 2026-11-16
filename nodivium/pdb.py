@@ -5,11 +5,19 @@ from typing import Optional
 
 
 PDB_ENTRY_URL = "https://data.rcsb.org/rest/v1/core/entry/{pdb_id}"
-PDB_FASTA_URL = "https://www.rcsb.org/fasta/entry/{pdb_id}"
+PDB_FASTA_URL = "https://www.rcsb.org/fasta/entry/{pdb_id}/download"
 PDB_STRUCT_URL = "https://files.rcsb.org/download/{pdb_id}.pdb"
 PDB_CIF_URL = "https://files.rcsb.org/download/{pdb_id}.cif"
 PDB_SEARCH_URL = "https://search.rcsb.org/rcsbsearch/v2/query"
 PDB_POLYMER_URL = "https://data.rcsb.org/rest/v1/core/polymer_entity/{pdb_id}/1"
+
+
+def fetch_polymer_entity(pdb_id: str, entity_id: str) -> dict:
+    """Retrieve a specific polymer entity and its source annotations."""
+    url = f"https://data.rcsb.org/rest/v1/core/polymer_entity/{pdb_id.upper().strip()}/{entity_id}"
+    response = requests.get(url, timeout=15)
+    response.raise_for_status()
+    return response.json()
 
 
 def fetch_pdb_metadata(pdb_id: str, retries: int = 3) -> dict:
@@ -32,6 +40,8 @@ def fetch_pdb_metadata(pdb_id: str, retries: int = 3) -> dict:
 def fetch_pdb_structure(pdb_id: str, fmt: str = "pdb", retries: int = 3) -> Optional[str]:
     """Download PDB or CIF structure file."""
     pdb_id = pdb_id.upper().strip()
+    if fmt not in {"pdb", "cif"}:
+        raise ValueError("PDB structure format must be pdb or cif.")
     url = PDB_STRUCT_URL.format(pdb_id=pdb_id) if fmt == "pdb" else PDB_CIF_URL.format(pdb_id=pdb_id)
 
     for attempt in range(retries):
@@ -82,6 +92,8 @@ def search_pdb(query: str, max_results: int = 10) -> list[dict]:
     try:
         resp = requests.post(PDB_SEARCH_URL, json=payload, timeout=15)
         resp.raise_for_status()
+        if resp.status_code == 204:
+            return []
         data = resp.json()
         results = []
         for hit in data.get("result_set", []):
@@ -116,8 +128,7 @@ def extract_pdb_summary(meta: dict, pdb_id: str) -> dict:
         "resolution": rcsb_entry.get("resolution_combined", [None])[0] if rcsb_entry.get("resolution_combined") else None,
         "r_free": r_free,
         "r_work": r_work,
-        "deposition_date": entry.get("id", ""),
-        "polymer_count": rcsb_entry.get("deposited_polymer_entity_count") or rcsb_entry.get("deposited_polymer_monomer_count", 0),
+        "deposition_date": meta.get("rcsb_accession_info", {}).get("deposit_date"),
+        "polymer_count": rcsb_entry.get("deposited_polymer_entity_count", 0),
         "atom_count": rcsb_entry.get("deposited_atom_count", 0),
-        "organism": rcsb_entry.get("polymer_entity_taxonomy_count", "N/A"),
     }

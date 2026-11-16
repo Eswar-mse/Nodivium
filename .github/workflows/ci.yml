@@ -8,9 +8,10 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest]
         python-version: ["3.10", "3.11", "3.12"]
 
     steps:
@@ -23,8 +24,34 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install biopython diskcache rich typer
-          pip install -e .
+          pip install -e ".[web,test]"
 
       - name: Run tests
-        run: python tests.py
+        env:
+          NODIVIUM_NCBI_EMAIL: tests@example.org
+        run: |
+          python tests.py
+          python -m pytest -q tests_upgrade.py
+
+      - name: Build and inspect installable wheel
+        run: |
+          python -m pip wheel --no-deps . --wheel-dir dist
+          python scripts/check_wheel.py
+
+  web-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+      - run: node fasta-parser.test.mjs
+        working-directory: web
+      - run: node sequence-metrics.test.mjs
+        working-directory: web

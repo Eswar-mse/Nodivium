@@ -1,4 +1,4 @@
-"""Rich terminal display helpers for BioFetch."""
+"""Rich terminal display helpers for Nodivium."""
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -10,6 +10,19 @@ from typing import Optional
 import contextlib
 
 console = Console()
+
+CLI_LOGO = r"""
+ A=T   N   N  OOO  DDDD  III  V   V  III  U   U  M   M
+  X    NN  N O   O D   D  I   V   V   I   U   U  MM MM
+ C=G   N N N O   O D   D  I    V V    I   U   U  M M M
+  X    N  NN O   O D   D  I    V V    I   U   U  M   M
+ G=C   N   N  OOO  DDDD  III    V    III   UUU   M   M
+"""
+
+
+def print_cli_logo():
+    """Show the compact Nodivium wordmark when opening the CLI."""
+    console.print(Text(CLI_LOGO, style="bold cyan"))
 
 
 def spinner(message: str):
@@ -24,10 +37,11 @@ def spinner(message: str):
 
 
 def print_header():
+    from nodivium import __version__
     console.print()
     console.print(
         Panel.fit(
-            "[bold cyan]BioFetch[/] [dim]v1.0.0[/]  •  [dim]NCBI · UniProt · PDB[/]",
+            f"[bold cyan]Nodivium[/] [dim]v{__version__}[/]  •  [dim]NCBI · UniProt · PDB[/]",
             border_style="cyan",
             padding=(0, 2),
         )
@@ -59,6 +73,15 @@ def print_fasta_preview(fasta_text: str, max_lines: int = 20):
         preview += f"\n... [{len(lines) - max_lines} more lines]"
     syntax = Syntax(preview, "text", theme="monokai", line_numbers=False, word_wrap=True)
     console.print(Panel(syntax, title="[bold]Sequence Preview[/]", border_style="dim"))
+
+
+def print_text_preview(content: str, fmt: str, max_lines: int = 20):
+    lines = content.strip().splitlines()
+    preview = "\n".join(lines[:max_lines])
+    if len(lines) > max_lines:
+        preview += f"\n... [{len(lines) - max_lines} more lines]"
+    console.print(Panel(Syntax(preview, "text", theme="monokai", word_wrap=True),
+                        title=f"[bold]{fmt.upper()} Preview[/]", border_style="dim"))
 
 
 def print_ncbi_summary(record: dict):
@@ -119,7 +142,7 @@ def print_pdb_summary(summary: dict):
     table.add_row("Resolution", f"{res} Å" if res else "N/A")
     table.add_row("R-free", f"{r_free:.3f}" if r_free else "N/A")
     table.add_row("R-work", f"{summary.get('r_work'):.3f}" if summary.get("r_work") else "N/A")
-    table.add_row("Polymer chains", str(summary.get("polymer_count", "N/A")))
+    table.add_row("Polymer entities", str(summary.get("polymer_count", "N/A")))
     table.add_row("Atom count", f"{summary.get('atom_count', 0):,}")
 
     console.print(Panel(table, title="[bold cyan]PDB Entry Summary[/]", border_style="cyan"))

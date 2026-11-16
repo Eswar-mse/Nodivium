@@ -1,4 +1,4 @@
-"""BioFetch test suite — mocked API responses, no network needed."""
+"""Nodivium test suite — mocked API responses, no network needed."""
 import sys
 import os
 import json
@@ -6,6 +6,9 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from io import StringIO
+
+# All NCBI calls in this suite are mocked; provide a syntactically valid contact.
+os.environ.setdefault("NODIVIUM_NCBI_EMAIL", "tests@example.org")
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -106,9 +109,9 @@ console.print("\n[bold cyan]── Cache Module ──────────�
 
 @test("Cache: set and get returns correct data")
 def _():
-    from biofetch.cache import BioCache
+    from nodivium.cache import BioCache
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch("biofetch.cache.get_cache_dir", return_value=Path(tmpdir)):
+        with patch("nodivium.cache.get_cache_dir", return_value=Path(tmpdir)):
             c = BioCache()
             c.set("ncbi", "NM_001", "fasta", "ATGCATGC")
             val = c.get("ncbi", "NM_001", "fasta")
@@ -118,9 +121,9 @@ def _():
 
 @test("Cache: miss returns None")
 def _():
-    from biofetch.cache import BioCache
+    from nodivium.cache import BioCache
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch("biofetch.cache.get_cache_dir", return_value=Path(tmpdir)):
+        with patch("nodivium.cache.get_cache_dir", return_value=Path(tmpdir)):
             c = BioCache()
             val = c.get("ncbi", "NONEXISTENT_9999", "fasta")
             assert val is None, f"Expected None, got {val!r}"
@@ -129,9 +132,9 @@ def _():
 
 @test("Cache: delete removes entry")
 def _():
-    from biofetch.cache import BioCache
+    from nodivium.cache import BioCache
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch("biofetch.cache.get_cache_dir", return_value=Path(tmpdir)):
+        with patch("nodivium.cache.get_cache_dir", return_value=Path(tmpdir)):
             c = BioCache()
             c.set("uniprot", "P68871", "fasta", ">P68871\nMVHLT")
             c.delete("uniprot", "P68871", "fasta")
@@ -142,9 +145,9 @@ def _():
 
 @test("Cache: clear empties all entries")
 def _():
-    from biofetch.cache import BioCache
+    from nodivium.cache import BioCache
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch("biofetch.cache.get_cache_dir", return_value=Path(tmpdir)):
+        with patch("nodivium.cache.get_cache_dir", return_value=Path(tmpdir)):
             c = BioCache()
             c.set("pdb", "1HHO", "pdb", "ATOM   1  N")
             c.set("pdb", "2HHB", "pdb", "ATOM   1  CA")
@@ -155,9 +158,9 @@ def _():
 
 @test("Cache: stats returns count and size")
 def _():
-    from biofetch.cache import BioCache
+    from nodivium.cache import BioCache
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch("biofetch.cache.get_cache_dir", return_value=Path(tmpdir)):
+        with patch("nodivium.cache.get_cache_dir", return_value=Path(tmpdir)):
             c = BioCache()
             c.set("ncbi", "X1", "fasta", "HELLO")
             stats = c.stats()
@@ -169,9 +172,9 @@ def _():
 
 @test("Cache: list_keys returns correct keys")
 def _():
-    from biofetch.cache import BioCache
+    from nodivium.cache import BioCache
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch("biofetch.cache.get_cache_dir", return_value=Path(tmpdir)):
+        with patch("nodivium.cache.get_cache_dir", return_value=Path(tmpdir)):
             c = BioCache()
             c.set("ncbi", "ABC", "fasta", "data1")
             c.set("uniprot", "XYZ", "json", "data2")
@@ -187,7 +190,7 @@ console.print("\n[bold cyan]── NCBI Module ───────────
 
 @test("NCBI: fetch returns mocked FASTA data")
 def _():
-    from biofetch import ncbi as ncbi_mod
+    from nodivium import ncbi as ncbi_mod
     mock_handle = MagicMock()
     mock_handle.read.return_value = SAMPLE_FASTA
     with patch("Bio.Entrez.efetch", return_value=mock_handle):
@@ -198,7 +201,7 @@ def _():
 
 @test("NCBI: search returns IDs and count")
 def _():
-    from biofetch import ncbi as ncbi_mod
+    from nodivium import ncbi as ncbi_mod
     mock_handle = MagicMock()
     mock_handle.return_value = {
         "IdList": ["NM_001301717", "NM_007294"],
@@ -221,7 +224,7 @@ def _():
 
 @test("NCBI: parse_fasta_stats computes GC content")
 def _():
-    from biofetch import ncbi as ncbi_mod
+    from nodivium import ncbi as ncbi_mod
     fasta = ">SEQ1 test\nATGCGCGCAT\n>SEQ2 test2\nAAAAAAAA\n"
     stats = ncbi_mod.parse_fasta_stats(fasta)
     assert len(stats) == 2
@@ -234,7 +237,7 @@ def _():
 
 @test("NCBI: parse_fasta_stats handles empty sequence gracefully")
 def _():
-    from biofetch import ncbi as ncbi_mod
+    from nodivium import ncbi as ncbi_mod
     fasta = ">EMPTY\n\n"
     stats = ncbi_mod.parse_fasta_stats(fasta)
     # empty FASTA should return empty list or handle gracefully
@@ -243,7 +246,7 @@ def _():
 
 @test("NCBI: batch_fetch returns dict keyed by accession")
 def _():
-    from biofetch import ncbi as ncbi_mod
+    from nodivium import ncbi as ncbi_mod
     call_count = {"n": 0}
     def mock_fetch(acc, db, fmt):
         call_count["n"] += 1
@@ -258,7 +261,7 @@ def _():
 
 @test("NCBI: db name aliasing works (nt → nucleotide)")
 def _():
-    from biofetch import ncbi as ncbi_mod
+    from nodivium import ncbi as ncbi_mod
     assert ncbi_mod.NCBI_DB_MAP.get("nt") == "nucleotide"
     assert ncbi_mod.NCBI_DB_MAP.get("prot") == "protein"
 
@@ -269,7 +272,7 @@ console.print("\n[bold cyan]── UniProt Module ──────────
 
 @test("UniProt: fetch returns mocked FASTA")
 def _():
-    from biofetch import uniprot as uni_mod
+    from nodivium import uniprot as uni_mod
     mock_resp = MagicMock()
     mock_resp.text = ">sp|P68871|HBB_HUMAN Hemoglobin\nMVHLTPEEKSAVTALWGKVNVDEVGGEALGR"
     mock_resp.raise_for_status = MagicMock()
@@ -281,7 +284,7 @@ def _():
 
 @test("UniProt: extract_uniprot_summary parses JSON correctly")
 def _():
-    from biofetch import uniprot as uni_mod
+    from nodivium import uniprot as uni_mod
     summary = uni_mod.extract_uniprot_summary(SAMPLE_UNIPROT_JSON)
     assert summary["accession"] == "P68871"
     assert summary["protein_name"] == "Hemoglobin subunit beta"
@@ -294,7 +297,7 @@ def _():
 
 @test("UniProt: extract_uniprot_summary handles missing fields gracefully")
 def _():
-    from biofetch import uniprot as uni_mod
+    from nodivium import uniprot as uni_mod
     sparse = {
         "primaryAccession": "XTEST",
         "uniProtkbId": "TEST_HUMAN",
@@ -310,7 +313,7 @@ def _():
 
 @test("UniProt: search returns list of dicts with expected keys")
 def _():
-    from biofetch import uniprot as uni_mod
+    from nodivium import uniprot as uni_mod
     mock_resp = MagicMock()
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = {
@@ -337,7 +340,7 @@ def _():
 
 @test("UniProt: fetch retries on failure")
 def _():
-    from biofetch import uniprot as uni_mod
+    from nodivium import uniprot as uni_mod
     import requests
     call_log = {"n": 0}
     def flaky_get(*args, **kwargs):
@@ -361,7 +364,7 @@ console.print("\n[bold cyan]── PDB Module ───────────�
 
 @test("PDB: fetch_pdb_metadata returns mocked dict")
 def _():
-    from biofetch import pdb as pdb_mod
+    from nodivium import pdb as pdb_mod
     mock_resp = MagicMock()
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = SAMPLE_PDB_META
@@ -372,7 +375,7 @@ def _():
 
 @test("PDB: extract_pdb_summary parses metadata correctly")
 def _():
-    from biofetch import pdb as pdb_mod
+    from nodivium import pdb as pdb_mod
     summary = pdb_mod.extract_pdb_summary(SAMPLE_PDB_META, "1HHO")
     assert summary["pdb_id"] == "1HHO"
     assert summary["title"] == "LIGANDED T STATE HAEMOGLOBIN"
@@ -384,7 +387,7 @@ def _():
 
 @test("PDB: fetch_pdb_fasta returns sequence text")
 def _():
-    from biofetch import pdb as pdb_mod
+    from nodivium import pdb as pdb_mod
     fasta_text = ">1HHO_1|Chain A|HBA_HUMAN\nVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKK\n"
     mock_resp = MagicMock()
     mock_resp.text = fasta_text
@@ -397,7 +400,7 @@ def _():
 
 @test("PDB: fetch_pdb_structure returns PDB format text")
 def _():
-    from biofetch import pdb as pdb_mod
+    from nodivium import pdb as pdb_mod
     pdb_text = "ATOM      1  N   VAL A   1      6.204  16.869   4.854  1.00 49.05\n"
     mock_resp = MagicMock()
     mock_resp.text = pdb_text
@@ -409,7 +412,7 @@ def _():
 
 @test("PDB: search_pdb returns list of PDB IDs with scores")
 def _():
-    from biofetch import pdb as pdb_mod
+    from nodivium import pdb as pdb_mod
     mock_resp = MagicMock()
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = {
@@ -427,7 +430,7 @@ def _():
 
 @test("PDB: accession ID is uppercased automatically")
 def _():
-    from biofetch import pdb as pdb_mod
+    from nodivium import pdb as pdb_mod
     mock_resp = MagicMock()
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = SAMPLE_PDB_META
@@ -443,8 +446,8 @@ console.print("\n[bold cyan]── Display Module ──────────
 
 @test("Display: print_uniprot_summary runs without error")
 def _():
-    from biofetch import uniprot as uni_mod
-    from biofetch import display as disp
+    from nodivium import uniprot as uni_mod
+    from nodivium import display as disp
     summary = uni_mod.extract_uniprot_summary(SAMPLE_UNIPROT_JSON)
     with patch.object(disp.console, "print"):
         disp.print_uniprot_summary(summary)  # should not raise
@@ -452,8 +455,8 @@ def _():
 
 @test("Display: print_pdb_summary runs without error")
 def _():
-    from biofetch import pdb as pdb_mod
-    from biofetch import display as disp
+    from nodivium import pdb as pdb_mod
+    from nodivium import display as disp
     summary = pdb_mod.extract_pdb_summary(SAMPLE_PDB_META, "1HHO")
     with patch.object(disp.console, "print"):
         disp.print_pdb_summary(summary)
@@ -461,7 +464,7 @@ def _():
 
 @test("Display: print_fasta_preview truncates long sequences")
 def _():
-    from biofetch import display as disp
+    from nodivium import display as disp
     long_fasta = "\n".join([f">SEQ{i}\nATGCATGC" for i in range(50)])
     captured = []
     with patch.object(disp.console, "print", side_effect=lambda *a, **kw: captured.append(a)):
@@ -471,7 +474,7 @@ def _():
 
 @test("Display: print_search_results_uniprot renders table")
 def _():
-    from biofetch import display as disp
+    from nodivium import display as disp
     results = [
         {
             "accession": "P68871",
@@ -494,34 +497,34 @@ console.print("\n[bold cyan]── CLI Integration ─────────�
 @test("CLI: version command prints version string")
 def _():
     from typer.testing import CliRunner
-    from biofetch.cli import app
+    from nodivium.cli import app
     runner = CliRunner()
     result = runner.invoke(app, ["version"])
     assert result.exit_code == 0
     output = result.output
-    assert "BioFetch" in output or "1.0.0" in output, f"Unexpected: {output!r}"
+    assert "Nodivium" in output or "1.0.0" in output, f"Unexpected: {output!r}"
 
 
 @test("CLI: fetch --source uniprot uses cache on second call")
 def _():
     from typer.testing import CliRunner
-    from biofetch.cli import app, _cache
-    from biofetch import uniprot as uni_mod
+    from nodivium.cli import app, _cache
+    from nodivium import uniprot as uni_mod
     runner = CliRunner()
     fasta_data = ">sp|P68871|HBB_HUMAN Hemoglobin\nMVHLTPEEKSAVT"
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch("biofetch.cache.get_cache_dir", return_value=Path(tmpdir)):
+        with patch("nodivium.cache.get_cache_dir", return_value=Path(tmpdir)):
             with patch.object(uni_mod, "fetch_uniprot", return_value=fasta_data) as mock_fetch:
                 # First call — hits API
-                with patch("biofetch.cli._cache") as mock_cache:
+                with patch("nodivium.cli._cache") as mock_cache:
                     mock_cache.get.return_value = None
                     mock_cache.set = MagicMock()
                     r1 = runner.invoke(app, ["fetch", "P68871", "--source", "uniprot"])
                     assert mock_cache.set.called
 
                 # Second call — served from cache
-                with patch("biofetch.cli._cache") as mock_cache:
+                with patch("nodivium.cli._cache") as mock_cache:
                     mock_cache.get.return_value = fasta_data
                     r2 = runner.invoke(app, ["fetch", "P68871", "--source", "uniprot"])
                     assert "cache" in r2.output.lower()
@@ -531,10 +534,10 @@ def _():
 @test("CLI: cache stats command runs")
 def _():
     from typer.testing import CliRunner
-    from biofetch.cli import app
+    from nodivium.cli import app
     runner = CliRunner()
-    with patch("biofetch.cli._cache") as mock_cache:
-        mock_cache.stats.return_value = {"count": 3, "size_bytes": 1024, "cache_dir": "/tmp/biofetch"}
+    with patch("nodivium.cli._cache") as mock_cache:
+        mock_cache.stats.return_value = {"count": 3, "size_bytes": 1024, "cache_dir": "/tmp/nodivium"}
         result = runner.invoke(app, ["cache", "stats"])
         assert result.exit_code == 0
 
@@ -542,9 +545,9 @@ def _():
 @test("CLI: cache list command shows keys")
 def _():
     from typer.testing import CliRunner
-    from biofetch.cli import app
+    from nodivium.cli import app
     runner = CliRunner()
-    with patch("biofetch.cli._cache") as mock_cache:
+    with patch("nodivium.cli._cache") as mock_cache:
         mock_cache.list_keys.return_value = ["ncbi:NM_001:fasta", "uniprot:P68871:fasta"]
         result = runner.invoke(app, ["cache", "list"])
         assert result.exit_code == 0
@@ -553,8 +556,8 @@ def _():
 @test("CLI: info --source pdb calls pdb_mod.fetch_pdb_metadata")
 def _():
     from typer.testing import CliRunner
-    from biofetch.cli import app
-    from biofetch import pdb as pdb_mod
+    from nodivium.cli import app
+    from nodivium import pdb as pdb_mod
     runner = CliRunner()
     with patch.object(pdb_mod, "fetch_pdb_metadata", return_value=SAMPLE_PDB_META) as mock_meta:
         result = runner.invoke(app, ["info", "1HHO", "--source", "pdb"])
@@ -565,8 +568,8 @@ def _():
 @test("CLI: search --source uniprot calls search_uniprot")
 def _():
     from typer.testing import CliRunner
-    from biofetch.cli import app
-    from biofetch import uniprot as uni_mod
+    from nodivium.cli import app
+    from nodivium import uniprot as uni_mod
     runner = CliRunner()
     mock_results = [{
         "accession": "P68871",
@@ -586,13 +589,13 @@ def _():
 @test("CLI: batch saves files to outdir")
 def _():
     from typer.testing import CliRunner
-    from biofetch.cli import app
-    from biofetch import uniprot as uni_mod
+    from nodivium.cli import app
+    from nodivium import uniprot as uni_mod
     runner = CliRunner()
     fasta = ">P68871\nMVHLT"
     with tempfile.TemporaryDirectory() as tmpdir:
         with patch.object(uni_mod, "fetch_uniprot", return_value=fasta):
-            with patch("biofetch.cli._cache") as mock_cache:
+            with patch("nodivium.cli._cache") as mock_cache:
                 mock_cache.get.return_value = None
                 mock_cache.set = MagicMock()
                 result = runner.invoke(app, [
