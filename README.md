@@ -198,38 +198,32 @@ Open any PDB entry, or your own PDB or mmCIF file, in an interactive Mol* viewer
 <div>&nbsp;</div>
 
 <!-- SCREENSHOT assets/structure.png: Mol* viewer with PDB 1HHO, showing the control panel (colors, Show components, Representations) beside the structure, with two residues selected and a distance measurement visible. -->
-<img src="assets/3D Molecular Protein Visualization Collage.png" alt="Interactive Mol* structure viewer for a PDB entry" width="100%"/>
+<div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+  <!-- Row 1 -->
+  <div style="display: flex; gap: 4%; justify-content: space-between;">
+    <img src="assets/1.png" alt="Image 1" style="width: 48%; height: auto;"/>
+    <img src="assets/2.png" alt="Image 2" style="width: 48%; height: auto;"/>
+  </div>
+  
+  <!-- Row 2 -->
+  <div style="display: flex; gap: 4%; justify-content: space-between;">
+    <img src="assets/3.png" alt="Image 3" style="width: 48%; height: auto;"/>
+    <img src="assets/4.png" alt="Image 4" style="width: 48%; height: auto;"/>
+  </div>
+  
+  <!-- Row 3 -->
+  <div style="display: flex; gap: 4%; justify-content: space-between;">
+    <img src="assets/5.png" alt="Image 5" style="width: 48%; height: auto;"/>
+    <img src="assets/6.png" alt="Image 6" style="width: 48%; height: auto;"/>
+  </div>
+</div>
+
 
 **Includes**: Rotate and zoom · Fit structure · Component toggles · Representation styles · Select residues · Label selection · Measure distance · Hide or isolate selection · Light and dark themes
 
 [Read more in the user guide](docs/USER_GUIDE.md#pdb-structure-view)
 <div>&nbsp;</div>
 
-<h3> Inspect Your Own Files</h3>
-
-Open FASTA, PDB or mmCIF files straight from disk. Multi-record FASTA files get a record picker with nucleotide and protein interpretation. Files stay inside your browser session and are never uploaded or cached.
-<div>&nbsp;</div>
-
-<!-- SCREENSHOT assets/local-file.png: the "Inspect locally" panel with a multi-record FASTA loaded, showing the record picker and the composition view. -->
-<img src="assets/local-file.png" alt="Inspecting a local FASTA file in the browser" width="100%"/>
-
-**Includes**: `.fasta` `.fa` `.faa` `.fna` `.pdb` `.cif` `.mmcif` · Up to 20 MB · Nothing leaves your browser
-
-[Read more in the user guide](docs/USER_GUIDE.md#5-inspect-your-own-files)
-<div>&nbsp;</div>
-
-<h3> Collections and Provenance Export</h3>
-
-Collect records in the format you want, review them in one list, and download a single ZIP. The `manifest.json` records every attempt, including failures, so the export can be audited.
-<div>&nbsp;</div>
-
-<!-- SCREENSHOT assets/collection.png: the Collection view with 4-5 collected records in mixed formats (FASTA, GenBank, CIF), and the Download ZIP button visible. Optionally a second image of manifest.json opened in an editor showing source, id, format, status, size and sha256. -->
-<img src="assets/collection.png" alt="Collection view with Download ZIP and manifest" width="100%"/>
-
-**Includes**: Up to 25 records or 20 MB per collection · Per-record format choice · `manifest.json` with SHA-256 checksums · Failed rows kept with their error
-
-[Read more in the user guide](docs/USER_GUIDE.md#6-download-records-and-collections)
-<div>&nbsp;</div>
 
 <img src="https://capsule-render.vercel.app/api?type=rect&height=4&color=0:05080f,50:38bdf8,100:05080f" alt="" width="100%"/>
 
@@ -238,9 +232,6 @@ Collect records in the format you want, review them in one list, and download a 
 </div>
 
 Everything that matters is scriptable. Run `nodivium` for the command guide, or `nodivium COMMAND --help` for options.
-
-<!-- SCREENSHOT assets/cli.png: a terminal running `nodivium search hemoglobin --source uniprot --reviewed --limit 5` with the Rich table output visible. Dark terminal theme. -->
-<img src="assets/cli.png" alt="Nodivium CLI search output" width="100%"/>
 
 ```bash
 nodivium search hemoglobin --source uniprot --reviewed --limit 5
@@ -274,7 +265,6 @@ nodivium cache stats
 [![PubMed](https://img.shields.io/badge/PubMed-0b3a63?style=for-the-badge)](docs/USER_GUIDE.md#8-supported-sources-and-formats)
 [![RCSB PDB](https://img.shields.io/badge/RCSB_PDB-0b3a63?style=for-the-badge)](docs/USER_GUIDE.md#8-supported-sources-and-formats)
 
-</div>
 
 | Source / record type | Formats | Default |
 |---|---|---|
@@ -284,6 +274,8 @@ nodivium cache stats
 | NCBI PubMed | `xml` · `medline` · `abstract` | `xml` |
 | UniProtKB | `fasta` · `json` · `txt` · `xml` · `tsv` | `fasta` |
 | RCSB PDB | `cif` · `pdb` · `fasta` | `cif` |
+
+</div>
 
 Search terms are 2 to 250 characters. Direct IDs can be up to 80 characters. See [supported sources and formats](docs/USER_GUIDE.md#8-supported-sources-and-formats) for the details.
 
