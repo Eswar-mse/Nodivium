@@ -1,10 +1,19 @@
 <div align="center">
-  <img src="assets/banner.gif" alt="Nodivium: Biological record exploration and visualization" />
+  <img src="assets/nodivium_banner_small.gif" alt="Nodivium: Biological record exploration and visualization" />
 </div>
 <p align="center">
   <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=15&duration=3000&pause=100000&color=38bdf8&center=true&vCenter=true&width=900&height=80&lines=EXPLORE+BIOLOGICAL+RECORDS,+SEE+THE+STRUCTURE,+AND+EXPORT+THE+EVIDENCE"/>
 </p>
 <img src="https://capsule-render.vercel.app/api?type=rect&height=4&color=0:05080f,50:38bdf8,100:05080f" alt="" width="100%"/>
+
+<div align="center">
+<h3>A Unified Workspace for Biological Records</h3>
+
+**Nodivium** brings records from **NCBI**, **UniProtKB** and **RCSB PDB** into one workspace. Search, read, visualize and export sequences, structures, genes and literature from a browser interface or a command line, instead of moving between three provider websites and a folder of loose downloads. Every export can carry a provenance manifest, so you can show where each file came from.
+
+<img src="https://capsule-render.vercel.app/api?type=rect&height=4&color=0:05080f,50:38bdf8,100:05080f" alt="" width="100%"/></div>
+
+
 <div align="center">
 
 [![PyPI](https://img.shields.io/pypi/v/nodivium?style=for-the-badge&logo=pypi&logoColor=38bdf8&labelColor=0b1220&color=1e6bff)](https://pypi.org/project/nodivium/)
@@ -51,11 +60,7 @@
 <img src="https://capsule-render.vercel.app/api?type=rect&height=4&color=0:05080f,50:38bdf8,100:05080f" alt="" width="100%"/></div>
 
 <div align="center">
-<h3>A Unified Workspace for Biological Records</h3>
-
-**Nodivium** brings records from **NCBI**, **UniProtKB** and **RCSB PDB** into one workspace. Search, read, visualize and export sequences, structures, genes and literature from a browser interface or a command line, instead of moving between three provider websites and a folder of loose downloads. Every export can carry a provenance manifest, so you can show where each file came from.
-
-### Core Capabilities
+<h3>Core Capabilities</h3>
 
 **Unified Search:** Search UniProtKB, NCBI (Nucleotide, Protein, Gene, PubMed) and RCSB PDB from one place. Open any record directly by accession.
 
@@ -75,10 +80,10 @@
 
 <div align="center">
 <h3> A Visual Preview </h3>
-A short look at the Nodivium workspace, from search to export.
+A look at the Nodivium workspace. It supports both dark and light themes
 
 <!-- DEMO GIF: a 15-25 s screen recording of the real web workspace. Search a term (e.g. "hemoglobin" in UniProtKB), open P68871, switch to PDB 1HHO and rotate the Mol* view, click Collect on two records, then Download ZIP. Save as assets/demo.gif -->
-<img src="assets/demo.gif" alt="Nodivium workspace demo: search, inspect, 3D view and ZIP export" width="100%"/>
+<img src="assets/Nodivium Research Workspace Split Theme.png" alt="Nodivium workspace demo: search, inspect, 3D view and ZIP export" width="100%"/>
 </div>
 
 <img src="https://capsule-render.vercel.app/api?type=rect&height=4&color=0:05080f,50:38bdf8,100:05080f" alt="" width="100%"/>
@@ -162,23 +167,16 @@ Choose UniProtKB, NCBI or RCSB PDB, then search for up to 50 ranked results or o
 <div>&nbsp;</div>
 
 <!-- SCREENSHOT assets/discover.png: three-pane workspace. Left Discover panel with a source selector (UniProtKB) and search results for "hemoglobin" with the "Reviewed UniProt entries only" switch on; the centre pane showing the selected record. Dark theme, full window. -->
-<img src="assets/discover.png" alt="Discover panel with ranked search results" width="100%"/>
+<div style="display: flex; gap: 4%; justify-content: space-between; width: 100%;">
+  <img src="assets/Screenshot From 2026-11-18 20-27-42.png" alt="Discover panel with ranked search results" style="width: 48%; height: auto;"/>
+  <img src="assets/Screenshot From 2026-11-18 20-25-56.png" alt="Discover panel with ranked search results" style="width: 48%; height: auto;"/>
+</div>
+
+
 
 **Includes**: UniProtKB · NCBI Nucleotide, Protein, Gene and PubMed · RCSB PDB · Open by ID · Reviewed-only filter · View source
 
 [Read more in the user guide](docs/USER_GUIDE.md#3-explore-records-in-the-browser)
-<div>&nbsp;</div>
-
-<h3> Source-Aware Record Views</h3>
-
-Each record opens with Overview, Annotations, Linked records and Raw data tabs, so you can move from a summary to the original provider payload without leaving the page.
-<div>&nbsp;</div>
-
-<!-- SCREENSHOT assets/record.png: centre pane showing UniProt P68871 with the Overview tab active, plus a visible row of tabs (Overview, Annotations, Linked records, Raw data). Crop to the record pane and tab bar. -->
-<img src="assets/record.png" alt="Record view with Overview, Annotations, Linked records and Raw data tabs" width="100%"/>
-
-**Includes**: Overview · Annotations · Linked records · Raw data · Missing data shown as missing
-
 <div>&nbsp;</div>
 
 <h3> Visual Inspector: Sequences</h3>
@@ -187,7 +185,7 @@ Inspect nucleotide and protein records through composition, GC content, windows,
 <div>&nbsp;</div>
 
 <!-- SCREENSHOT assets/inspector-sequence.png: right-hand Visual inspector for an NCBI nucleotide record such as NM_007294, showing base composition, the GC content plot and a highlighted feature or range. -->
-<img src="assets/inspector-sequence.png" alt="Visual inspector showing nucleotide composition and GC content" width="100%"/>
+<img src="assets/Screenshot From 2026-11-18 20-28-13.png" alt="Visual inspector showing nucleotide composition and GC content" width="100%"/>
 
 **Includes**: Base and amino-acid composition · GC content · Sliding windows · Feature highlighting · Gene coordinates · PubMed abstracts
 
@@ -200,7 +198,7 @@ Open any PDB entry, or your own PDB or mmCIF file, in an interactive Mol* viewer
 <div>&nbsp;</div>
 
 <!-- SCREENSHOT assets/structure.png: Mol* viewer with PDB 1HHO, showing the control panel (colors, Show components, Representations) beside the structure, with two residues selected and a distance measurement visible. -->
-<img src="assets/structure.png" alt="Interactive Mol* structure viewer for a PDB entry" width="100%"/>
+<img src="assets/3D Molecular Protein Visualization Collage.png" alt="Interactive Mol* structure viewer for a PDB entry" width="100%"/>
 
 **Includes**: Rotate and zoom · Fit structure · Component toggles · Representation styles · Select residues · Label selection · Measure distance · Hide or isolate selection · Light and dark themes
 
